@@ -1,0 +1,132 @@
+---
+title: "WiDS_Datathon_2022"
+author: "Uyen Nguyen"
+date: "2/21/2022"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center')
+library(tidyverse)
+library(corrplot)
+library(stringr)
+library(ggcorrplot)
+
+test <- tibble(read.csv('test.csv'))
+train <- tibble(read.csv('train.csv'))
+```
+
+
+### EDA
+
+```{r}
+# Making two vectors to contain column names of train dataset and how many NAs
+# there are for each column
+
+na_col <- c()
+col_names <- colnames(train)
+
+for (i in 1:ncol(train)) {
+  na_col[i] <- sum(is.na(train[,i]))
+}
+
+tibble(col_names, na_col) %>%
+  filter(na_col != 0) %>%  
+  arrange(desc(na_col))
+```
+
+The variables:
+
+* days_with_fog
+* direction_peak_wind_speed
+* direction_max_wind_speed
+* max_wind_speed 
+
+all have NAs for more than half of the rows in train. While
+
+* energy_star_rating
+* year_built 
+
+have NAs for less than half of the rows in train. There are **`r sum(complete.cases(train))` (less than a quarter)** complete cases in train. This might be something to keep in mind 
+regarding the approach we will take.  
+
+Since we're not entirely sure if we'll be using the train dataset that includes NAs
+in several columns or we'll be using only the completed cases instead. I created 
+the train_complete_cases tibble with only complete cases free from columns' NAs
+mentioned above. 
+
+(If we decide to use train_complete_cases to fit our model, we should also bootstrap
+our training tibble since we took a massive cut to the data set.)
+
+```{r}
+train_complete_cases <- train[complete.cases(train),]
+summary(train_complete_cases)
+```
+
+After gathering only the complete cases, I noticed that days_above_110F had 0
+for both min and max so I took that column out. 
+
+```{r}
+train_complete_cases <- train_complete_cases %>% select(-days_above_110F)
+```
+
+The correlation matrix is produced below. 
+
+```{r out.width='100%', out.height='100%', fig.align='center'}
+ggcorrplot(cor(train_complete_cases %>% select(where(is.numeric))), type = 'lower', tl.cex = 5, ggtheme = ggplot2::theme_void())
+```
+
+There are no real variables that jumped out for the response variable site_eui 
+from the correlation matrix so we'll proceed with caution on any linear assumptions.
+
+For the sake of visualization, I grouped values in the variable facility_type into 
+broader categories such as Public, Education, Healthcare, etc. to better visualize
+these groups. 
+
+```{r}
+# Making a function to convert details in facility_type into broad groups in
+# variable class
+train_complete_cases$class <- ''
+
+train_complete_cases[train_complete_cases$facility_type %in% c('2to4_Unit_Building', '5plus_Unit_Building', 
+                                 'Mixed_Use_Commercial_and_Residential', 
+                                 'Mixed_Use_Predominantly_Commercial', 
+                                 'Mixed_Use_Predominantly_Residential', 
+                                 'Multifamily_Uncategorized'),]$class <- 'Residential'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Public'),]$class <- 'Public'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Education'),]$class <- 'Education'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Food Service'),]$class <- 'Food Service'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Food'),]$class <- 'Food Service'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Health'),]$class <- 'Health Care'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Office'),]$class <- 'Office'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Lodging'),]$class <- 'Lodging'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Nursing'),]$class <- 'Health Care'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Retail'),]$class <- 'Retail'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Warehouse'),]$class <- 'Warehouse'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Service'),]$class <- 'Service'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Religious'),]$class <- 'Religious'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Industrial'),]$class <- 'Industrial'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Laboratory'),]$class <- 'Health Care'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Commercial'),]$class <- 'Commercial'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Data'),]$class <- 'Data Center'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Grocery'),]$class <- 'Grocery'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Parking'),]$class <- 'Parking Garage'
+train_complete_cases[str_which(train_complete_cases$facility_type, 'Religious'),]$class <- 'Religious'
+```
+Here are some plots to visualize this data. 
+
+```{r}
+ggplot(train_complete_cases) +
+  geom_point(aes(x=floor_area, y=site_eui, color = energy_star_rating)) +
+  facet_wrap(~class)
+
+ggplot(train_complete_cases, aes(x=site_eui, fill = class)) +
+  geom_histogram()
+
+ggplot(train_complete_cases, aes(x=energy_star_rating, fill = class)) +
+  geom_histogram()
+
+ggplot(train_complete_cases, aes(x=avg_temp, fill = class)) +
+  geom_histogram()
+```
+
