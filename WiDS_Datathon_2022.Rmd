@@ -1,0 +1,161 @@
+---
+title: "WiDS Datathon 2022 - Building Energy Usage"
+author: "Haley Egan"
+date: "2/21/2022"
+output: html_document
+---
+## Data Overview
+* 100k observations collected over 7 years
+* Building characteristics, weather data, energy usage
+* Site Energy Usage Intensity (Sute EUI)
+* Each row = single building observed in a given year
+* Goal: predict the Site EUI for each row, given the characteristics of the building and the weather data for the location of the building
+* Submit a solution file containing the predicted Site EUI values for each row in the test dataset.
+(1) the training dataset where the observed values of the Site EUI for each row is provided and 
+(2) the test dataset where we withhold the observed values of the Site EUI for each row.
+
+```{r}
+#load graphing libraries
+library(GGally)
+library(ggplot2)
+library(tidyverse)
+library(MASS)
+library(class)
+library(dplyr)
+library(leaps)
+```
+
+```{r}
+#read in data from csv file 
+test <- read.csv(file='test.csv')
+train <- read.csv(file='train.csv')
+```
+
+```{r}
+#view datasets
+#view(test)
+#view(train)
+head(test)
+head(train)
+```
+
+
+```{r}
+dim(test)
+dim(train)
+```
+```{r}
+colnames(train)
+```
+```{r}
+#drop null and values
+train <- na.omit(train)
+#check na data
+sum(is.na(train$column))
+```
+
+
+```{r}
+#linear regression model of full data set 
+full <- lm(site_eui~., data=train)
+summary(full)
+```
+
+```{r}
+#reduced linear regression model
+reduced.lm <- lm(site_eui ~ building_class + facility_type + floor_area + year_built +
+                energy_star_rating + ELEVATION + cooling_degree_days + heating_degree_days+
+                avg_temp + days_below_30F + days_below_20F +
+                days_below_10F + days_below_0F + days_above_80F + days_above_90F +
+                days_above_100F + days_above_110F, data=train)
+summary(reduced.lm)
+```
+
+```{r}
+#linear regression model for temp variables
+lm.temps <- lm(site_eui~Year_Factor+floor_area+year_built+energy_star_rating+direction_max_wind_speed+direction_peak_wind_speed+avg_temp+cooling_degree_days+heating_degree_days+january_avg_temp+february_avg_temp+march_avg_temp+april_avg_temp+may_avg_temp+june_avg_temp+july_avg_temp+august_avg_temp+september_avg_temp+october_avg_temp+november_avg_temp+december_avg_temp+days_below_30F+ days_below_20F+days_below_10F+days_below_0F+days_above_80F+days_above_90F+days_above_100F+days_above_110F, data=train)
+summary(lm.temps)
+```
+```{r}
+#logistic regression model
+glm.fit <- glm(site_eui~facility_type+building_class+State_Factor, data=train)
+summary(glm.fit)
+```
+
+```{r}
+#reduced data frame
+reduced_train <- subset(train, select = c(site_eui, ELEVATION, Year_Factor, floor_area, year_built, energy_star_rating, heating_degree_days, cooling_degree_days, avg_temp, march_avg_temp, april_avg_temp, june_avg_temp, july_avg_temp, august_avg_temp, september_avg_temp, october_avg_temp, november_avg_temp, december_avg_temp, days_above_100F, days_below_30F, days_below_10F))
+head(reduced_train)
+```
+
+```{r}
+#statistical summary of data
+summary(reduced_train)
+```
+```{r}
+#cor(reduced_train)
+```
+
+# Model Diagnostics for quantitative variables
+```{r}
+#overal model diagnostics, one level
+allregs <- regsubsets(site_eui~., data=reduced_train, nbest=1)
+summary(allregs)
+```
+
+```{r}
+#overal model diagnostics, two level
+allregs <- regsubsets(site_eui~., data=reduced_train, nbest=2)
+summary(allregs)
+```
+
+```{r}
+#find coefs and predictors of model with best adj r2, cp, bic
+coef(allregs, which.max(summary(allregs)$adjr2))
+coef(allregs, which.min(summary(allregs)$cp))
+coef(allregs, which.min(summary(allregs)$bic))
+```
+Model Candidate: Year_Factor, floor_area, energy_star_rating, cooling_degree_days, april_avg_temp, july_avg_temp, august_avg_temp, days_below_30F 
+
+
+```{r}
+#intercept only model
+regnull <- lm(site_eui~1, data=reduced_train)
+
+#model with all predictors
+regfull <- lm(site_eui~., data=reduced_train)
+```
+
+```{r}
+#forward selection
+step(regnull, scope=list(lower=regnull, upper=regfull), direction='forward')
+```
+Model Candidate: energy_star_rating, Year_Factor, cooling_degree_days, april_avg_temp, floor_area, july_avg_temp, days_below_30F, august_avg_temp, ELEVATION, october_avg_temp, december_avg_temp, year_built  
+
+```{r}
+#backward elimination
+step(regfull, scope=list(lower=regnull, upper=regfull), direction='backward')
+```
+Model Candidate: all predictors except days_above_100F
+
+```{r}
+#stepwise regression
+step(regfull, scope=list(lower=regnull, upper=regfull), direction='both')
+```
+
+Model Candidate: all predictors except days_above_100F
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
