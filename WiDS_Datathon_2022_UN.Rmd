@@ -130,3 +130,108 @@ ggplot(train_complete_cases, aes(x=avg_temp, fill = class)) +
   geom_histogram()
 ```
 
+## Data Analysis
+
+
+
+```{r}
+set.seed(1)
+
+### Train data set provided
+
+# na_train_1 <- lm(site_eui ~ year_built + floor_area + cooling_degree_days + heating_degree_days +
+#    facility_type + avg_temp, data = train)
+# sum_train_1 <- summary(na_train_1)
+# sqrt(mean(sum_train_1$residuals^2))
+# 
+# yhat<-na_train_1$fitted.values
+# res<-sum_train_1$residuals
+# Data<-data.frame(yhat,res)
+# 
+# ggplot(Data, aes(x=yhat,y=res))+
+# geom_point()+
+# geom_hline(yintercept=0, color="red")+
+# labs(x="Fitted y",
+# y="Residuals",
+# title="Residual Plot")
+
+na_train_2 <- lm(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating, data = train)
+sum_train_2 <-summary(na_train_2)
+sqrt(mean(sum_train_2$residuals^2))
+
+yhat<-na_train_2$fitted.values
+res<-sum_train_2$residuals
+Data<-data.frame(yhat,res)
+
+ggplot(Data, aes(x=yhat,y=res))+
+geom_point()+
+geom_hline(yintercept=0, color="red")+
+labs(x="Fitted y",
+y="Residuals",
+title="Residual Plot")
+
+# na_train_3 <- lm(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating + avg_temp + heating_degree_days + march_avg_temp + june_avg_temp + august_avg_temp + 
+# november_avg_temp + december_avg_temp, data = train)
+# sum_train_3 <-summary(na_train_3)
+# sqrt(mean(sum_train_3$residuals^2))
+# 
+# yhat<-na_train_3$fitted.values
+# res<-sum_train_3$residuals
+# Data<-data.frame(yhat,res)
+# 
+# ggplot(Data, aes(x=yhat,y=res))+
+# geom_point()+
+# geom_hline(yintercept=0, color="red")+
+# labs(x="Fitted y",
+# y="Residuals",
+# title="Residual Plot")
+
+### Complete cases of train data set
+
+# comp_train_1 <- lm(site_eui ~ year_built + floor_area + cooling_degree_days + heating_degree_days +
+#    facility_type + avg_temp, data = train_complete_cases)
+# sum_train_1_comp <- summary(comp_train_1)
+# sqrt(mean(sum_train_1_comp$residuals^2))
+# 
+# yhat<-comp_train_1$fitted.values
+# res<-sum_train_1_comp$residuals
+# Data<-data.frame(yhat,res)
+# 
+# ggplot(Data, aes(x=yhat,y=res))+
+# geom_point()+
+# geom_hline(yintercept=0, color="red")+
+# labs(x="Fitted y",
+# y="Residuals",
+# title="Residual Plot")
+# 
+# comp_train_2 <- lm(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating, data = train_complete_cases)
+# sum_train_2_comp <-summary(comp_train_2)
+# sqrt(mean(sum_train_2_comp$residuals^2))
+# 
+# yhat<-comp_train_2$fitted.values
+# res<-sum_train_2_comp$residuals
+# Data<-data.frame(yhat,res)
+# 
+# ggplot(Data, aes(x=yhat,y=res))+
+# geom_point()+
+# geom_hline(yintercept=0, color="red")+
+# labs(x="Fitted y",
+# y="Residuals",
+# title="Residual Plot")
+# 
+# comp_train_3 <- lm(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating + avg_temp + heating_degree_days + march_avg_temp + june_avg_temp + august_avg_temp + 
+# november_avg_temp + december_avg_temp, data = train_complete_cases)
+# sum_train_3_comp <-summary(comp_train_3)
+# sqrt(mean(sum_train_3_comp$residuals^2))
+# 
+# yhat<-comp_train_3$fitted.values
+# res<-sum_train_3_comp$residuals
+# Data<-data.frame(yhat,res)
+# 
+# ggplot(Data, aes(x=yhat,y=res))+
+# geom_point()+
+# geom_hline(yintercept=0, color="red")+
+# labs(x="Fitted y",
+# y="Residuals",
+# title="Residual Plot")
+```
