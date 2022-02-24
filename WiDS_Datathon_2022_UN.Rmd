@@ -132,7 +132,7 @@ ggplot(train_complete_cases, aes(x=avg_temp, fill = class)) +
 
 ## Data Analysis
 
-
+Linear regression (doing it just to do it)
 
 ```{r}
 set.seed(1)
@@ -235,3 +235,62 @@ title="Residual Plot")
 # y="Residuals",
 # title="Residual Plot")
 ```
+
+### Random Forest
+
+```{r}
+set.seed(1)
+
+library(randomForest)
+
+rf <- randomForest(site_eui ~ ., data = train_complete_cases, mtry = 8, importance = T)
+summary(rf)
+rf
+
+# y_pred <- predict(rf, newdata = test)
+plot(rf)
+
+importance(rf)
+
+varImpPlot(rf)
+```
+
+### Boosting
+
+
+```{r}
+library(gbm)
+
+set.seed(12)
+
+gbm <- gbm(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating, data = train_complete_cases, distribution = 'gaussian', n.trees = 5000, interaction.depth= 4)
+summary(gbm)
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
