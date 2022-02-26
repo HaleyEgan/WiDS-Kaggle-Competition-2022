@@ -16,6 +16,13 @@ library(gam)
 test <- tibble(read.csv('test.csv'))
 train <- tibble(read.csv('train.csv'))
 ```
+```{r}
+#view(train)
+#view(test)
+```
+```{r}
+#select(train, c("site_eui"))
+```
 
 
 ### EDA
@@ -250,11 +257,11 @@ test$site_eui <- 0
 test$site_eui <- predict(rf, newdata = test)
 
 rf_complete <- tibble(id = test$id, site_eui = test$site_eui)
-# plot(rf)
+plot(rf)
 # 
-# importance(rf)
+importance(rf)
 # 
-# varImpPlot(rf)
+varImpPlot(rf)
 ```
 
 ### Boosting
@@ -269,6 +276,7 @@ summary(gbm)
 
 ### Gam
 ```{r}
+#set.seed(1)
 gm <- gam(site_eui ~ s(Year_Factor,4) + s(floor_area,4) + s(year_built,4) + s(energy_star_rating,4), data = train)
 test$site_eui2 <- predict(gm, newdata = test)
 
@@ -284,6 +292,28 @@ head(gam_complete)
 head(rf_complete)
 ```
 
+```{r}
+#view(rf_complete)
+#view(gam_complete)
+#view(gam_with_nas)
+#typeof(rf_complete)
+```
+```{r}
+#create df for results
+rf_df <- as.data.frame(rf_complete)
+rf_df
+
+gam_df <- as.data.frame(gam_complete)
+gam_df
+```
+
+
+
+```{r}
+#write df to csv file
+write.csv(rf_df, "C:\\Users\\haley\\Documents\\GitHub\\WiDS-Kaggle-Competition-2022\\site_eui_estimate1.csv", row.names=FALSE)
+write.csv(gam_df,"C:\\Users\\haley\\Documents\\GitHub\\WiDS-Kaggle-Competition-2022\\site_eui_estimate2.csv", row.names=FALSE)
+```
 
 
 
