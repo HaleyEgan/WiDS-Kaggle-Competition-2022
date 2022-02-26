@@ -11,6 +11,7 @@ library(tidyverse)
 library(corrplot)
 library(stringr)
 library(ggcorrplot)
+library(gam)
 
 test <- tibble(read.csv('test.csv'))
 train <- tibble(read.csv('train.csv'))
@@ -239,25 +240,24 @@ title="Residual Plot")
 ### Random Forest
 
 ```{r}
-set.seed(1)
-
 library(randomForest)
 
-rf <- randomForest(site_eui ~ ., data = train_complete_cases, mtry = 8, importance = T)
+rf <- randomForest(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating, data = train_complete_cases, mtry = 8, importance = T)
 summary(rf)
 rf
 
-# y_pred <- predict(rf, newdata = test)
-plot(rf)
+test$site_eui <- 0
+test$site_eui <- predict(rf, newdata = test)
 
-importance(rf)
-
-varImpPlot(rf)
+rf_complete <- tibble(id = test$id, site_eui = test$site_eui)
+# plot(rf)
+# 
+# importance(rf)
+# 
+# varImpPlot(rf)
 ```
 
 ### Boosting
-
-
 ```{r}
 library(gbm)
 
@@ -267,6 +267,22 @@ gbm <- gbm(site_eui ~ Year_Factor + floor_area + year_built + energy_star_rating
 summary(gbm)
 ```
 
+### Gam
+```{r}
+gm <- gam(site_eui ~ s(Year_Factor,4) + s(floor_area,4) + s(year_built,4) + s(energy_star_rating,4), data = train)
+test$site_eui2 <- predict(gm, newdata = test)
+
+gam_with_nas <- tibble(id = test$id, site_eui = test$site_eui2)
+head(gam_with_nas)
+
+gm_comp <- gam(site_eui ~ s(Year_Factor,4) + s(floor_area,4) + s(year_built,4) + s(energy_star_rating,4), data = train_complete_cases)
+test$site_eui3 <- predict(gm_comp, newdata = test)
+
+gam_complete <- tibble(id = test$id, site_eui = test$site_eui3)
+head(gam_complete)
+
+head(rf_complete)
+```
 
 
 
