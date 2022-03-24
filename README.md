@@ -7,3 +7,5 @@ According to a report issued by the International Energy Agency (IEA), the lifec
 
 ## Overview: the dataset and challenge
 The WiDS Datathon dataset was created in collaboration with Climate Change AI (CCAI) and Lawrence Berkeley National Laboratory (Berkeley Lab). WiDS Datathon participants analyzed differences in building energy efficiency, creating models to predict building energy consumption. Participants used a dataset consisting of variables that describe building characteristics and climate and weather variables for the regions in which the buildings are located. Accurate predictions of energy consumption can help policymakers target retrofitting efforts to maximize emissions reductions.
+
+More information about the competition, data set, and rules can be found at https://www.kaggle.com/competitions/widsdatathon2022. 
