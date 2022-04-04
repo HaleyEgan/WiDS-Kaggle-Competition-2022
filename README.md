@@ -1,5 +1,7 @@
 # WiDS-Kaggle-Competition-2022
 
+The following is from the Kaggle project description at https://www.kaggle.com/competitions/widsdatathon2022:
+
 ## Background
 Climate change is a globally relevant, urgent, and multi-faceted issue heavily impacted by energy policy and infrastructure. Addressing climate change involves mitigation (i.e. mitigating greenhouse gas emissions) and adaptation (i.e. preparing for unavoidable consequences). Mitigation of GHG emissions requires changes to electricity systems, transportation, buildings, industry, and land use.
 
